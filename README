@@ -1,0 +1,92 @@
+This is a simple Spring add-on that simplifies working with custom events and also Spring 
+ApplicationEvents.
+
+It is inspired by CDI that I read about in this blog
+http://www.reverttoconsole.com/blog/jee6/understanding-jsr299-contexts-and-dependency-injection-explained/
+I find using a simple annotation easier than defining a Listener interface and an Observable that
+has and (add|remove)Listener methods.
+
+So here is how it works
+You need a simple (a)synchronous notifications across your beans. For example we'd like to monitor Deployment events.
+For every Deployment you'd like to send an email asynchronously.
+
+The first thing that comes to mind is this:
+
+public interface DeploymentListener {
+  void onDeployment(Deployment deployment);
+}
+
+public interface DeploymentService {
+  void addDeploymentListener(DeploymentListener listener);
+  void addDeploymentListener(DeploymentListener listener);
+  void fireDeploymentEvent(Deployment deployment);
+}
+
+public class EmailNotifier implements DeploymentListener {
+  void onDeployment(Deployment deployment) {
+    // send mail
+  }
+  
+  //even more code omitted: adding 'this' to a DeploymentService bean 
+}
+
+public class MyBean {
+
+  void deploy() {
+    // ...
+    deployemntService.fireDeploymentEvent(new Deployment());
+  }
+}
+
+This machinery is not really needed. What's more the code for managing listeners is not listed and is probably buried
+in some AbstracDeploymentService class.
+
+Bottom line is it all boils down to sending an event and receiving it. The easyevent package handles listeners in a 
+generic way. There are two abstractions:
+
+public interface EventPublisher {
+    public void publish(Object event);
+}
+
+@Retention(RetentionPolicy.RUNTIME)
+@Target(ElementType.METHOD)
+public @interface Observer {
+
+}
+
+
+You'd use EventPublisher to publish all kinds of events. You handle the events in a method annotated with @Observer:
+
+public class EmailNotifier implements DeploymentListener {
+  
+  @Observer
+  public void (Deployment deployment) {
+    // send mail
+  }
+}
+
+
+
+public class MyBean {
+  void deploy() {
+    // ...
+    eventPublisher.publish(new Deployment());
+  }
+}
+
+All public void, single-argument methods annotated with @Observer are eligible for event-handlers.  
+And this is the spring xml you'd need to enable the easyevents:
+  <task:executor id="taskExecutor" pool-size="5" />
+  
+  <bean id="eventPublisher" class="org.springthing.easyevents.DefaultEventPublisher">
+    <property name="taskExecutor" ref="taskExecutor"/>
+  </bean>
+  
+  <bean class="org.springthing.easyevents.ObserverAnnotationBeanPostProcessor">
+    <property name="eventPublisherImpl" ref="eventPublisher"/>
+  </bean>
+
+Setting taskExecutor is optional and allows for executing the handler methods asynchronously. If it is not
+set handlers will be executed in the caller thread.
+ 
+

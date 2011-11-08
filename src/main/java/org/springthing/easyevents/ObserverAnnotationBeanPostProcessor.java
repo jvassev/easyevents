@@ -19,7 +19,7 @@ import org.springframework.util.Assert;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.util.ReflectionUtils.MethodCallback;
 
-public class ObservesAnnotationBeanPostProcessor implements BeanPostProcessor, Ordered, ApplicationContextAware,
+public class ObserverAnnotationBeanPostProcessor implements BeanPostProcessor, Ordered, ApplicationContextAware,
         ApplicationListener<ApplicationContextEvent> {
 
     private final List<ObservableCallback> callbacks;
@@ -28,7 +28,7 @@ public class ObservesAnnotationBeanPostProcessor implements BeanPostProcessor, O
 
     private DefaultEventPublisher defaultEventPublisher;
 
-    public ObservesAnnotationBeanPostProcessor() {
+    public ObserverAnnotationBeanPostProcessor() {
         callbacks = new ArrayList<ObservableCallback>();
     }
 

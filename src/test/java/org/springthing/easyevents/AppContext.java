@@ -18,8 +18,8 @@ public class AppContext {
     }
 
     @Bean
-    public ObservesAnnotationBeanPostProcessor beanPostProcessor() {
-        ObservesAnnotationBeanPostProcessor postProcessor = new ObservesAnnotationBeanPostProcessor();
+    public ObserverAnnotationBeanPostProcessor beanPostProcessor() {
+        ObserverAnnotationBeanPostProcessor postProcessor = new ObserverAnnotationBeanPostProcessor();
         postProcessor.setDefaultEventPublisher(eventPublisher());
         return postProcessor;
     }

@@ -30,16 +30,16 @@ public class EmailNotifier implements DeploymentListener {
   //even more code omitted: adding 'this' to a DeploymentService bean 
 }
 
-public class MyBean {
+public class ComplexBean {
 
   void deploy() {
     // ...
-    deployemntService.fireDeploymentEvent(new Deployment());
+    deploymentService.fireDeploymentEvent(new Deployment());
   }
 }
 
 This machinery is not really needed. What's more the code for managing listeners is not listed and is probably buried
-in some AbstracDeploymentService class.
+in some AbstractDeploymentService class.
 
 Bottom line is it all boils down to sending an event and receiving it. The easyevent package handles listeners in a 
 generic way. There are two abstractions:
@@ -60,7 +60,7 @@ You'd use EventPublisher to publish all kinds of events. You handle the events i
 public class EmailNotifier implements DeploymentListener {
   
   @Observer
-  public void (Deployment deployment) {
+  public void onDeployment(Deployment deployment) {
     // send mail
   }
 }
@@ -74,7 +74,26 @@ public class MyBean {
   }
 }
 
-All public void, single-argument methods annotated with @Observer are eligible for event-handlers.  
+But what if also need to send an email on Restart events? Write another family of interfaces?
+It's as easy as adding another annotated method:
+
+public class EmailNotifier implements DeploymentListener {
+  
+  @Observer
+  public void onDeployment(Deployment deployment) {
+    // send mail
+  }
+  
+  @Observer
+  public void onRestart(Restart restart) {
+    // send mail
+  }
+}
+
+
+All public void, single-argument methods annotated with @Observer are eligible for event-handlers. The name of the method
+doesn't matter.
+
 And this is the spring xml you'd need to enable the easyevents:
   <task:executor id="taskExecutor" pool-size="5" />
   
@@ -88,5 +107,19 @@ And this is the spring xml you'd need to enable the easyevents:
 
 Setting taskExecutor is optional and allows for executing the handler methods asynchronously. If it is not
 set handlers will be executed in the caller thread.
+
+
+Easyevents is also integrated with spring's ApplicationEvents (http://static.springsource.org/spring/docs/3.0.x/spring-framework-reference/html/beans.html#context-functionality-events)
+
+If you'd like to handle all RequestHandledEvent events, just annotate a method of on of your beans - just make sure that
+it has exactly 1 argument of type RequestHandledEvent
+
+@Observer
+public void requestProcessed(RequestHandledEvent event) {
+  ...
+}
+
+You can also easily publish such event using eventPublisher.publish(new RequestHandledEvent()) yourself!
+
  
 

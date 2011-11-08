@@ -17,7 +17,7 @@ public class EventPublisherTest {
 
     @Before
     public void setUp() {
-        applicationContext = new AnnotationConfigApplicationContext(TestContext.class);
+        applicationContext = new AnnotationConfigApplicationContext(AppContext.class);
         observer = applicationContext.getBean(ObserverBean.class);
         eventPublisher = applicationContext.getBean(EventPublisher.class);
     }

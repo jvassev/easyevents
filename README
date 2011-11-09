@@ -18,7 +18,7 @@ public interface DeploymentListener {
 
 public interface DeploymentService {
   void addDeploymentListener(DeploymentListener listener);
-  void addDeploymentListener(DeploymentListener listener);
+  void removeDeploymentListener(DeploymentListener listener);
   void fireDeploymentEvent(Deployment deployment);
 }
 
@@ -55,7 +55,7 @@ public @interface Observer {
 }
 
 
-You'd use EventPublisher to publish all kinds of events. You handle the events in a method annotated with @Observer:
+You'd use a single EventPublisher to publish all kinds of events. You handle the events in a method annotated with @Observer:
 
 public class EmailNotifier implements DeploymentListener {
   
@@ -106,7 +106,7 @@ And this is the spring xml you'd need to enable the easyevents:
   </bean>
 
 Setting taskExecutor is optional and allows for executing the handler methods asynchronously. If it is not
-set handlers will be executed in the caller thread.
+set the handlers will be executed in the publisher's thread.
 
 
 Easyevents is also integrated with spring's ApplicationEvents (http://static.springsource.org/spring/docs/3.0.x/spring-framework-reference/html/beans.html#context-functionality-events)
